@@ -14,6 +14,7 @@ from homeassistant.const import CONF_HOST, CONF_PASSWORD, CONF_PORT, CONF_USERNA
 from homeassistant.core import DOMAIN as HOMEASSISTANT_DOMAIN, HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResultType
 from homeassistant.helpers import config_validation as cv, issue_registry as ir
+from homeassistant.helpers.device_registry import format_mac
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -112,9 +113,10 @@ class UniFiScannerEntity(
     def __init__(self, coordinator: UniFiDirectDataUpdateCoordinator, mac: str) -> None:
         """Initialize the tracked device."""
         super().__init__(coordinator)
-        self._mac = mac
-        device = coordinator.data.get(mac, {})
-        self._attr_name = device.get("hostname") or mac
+        self._mac = format_mac(mac)
+        device = coordinator.data.get(self._mac, {})
+        self._attr_name = device.get("hostname") or self._mac
+        self._attr_unique_id = self._mac
 
     @property
     @override
